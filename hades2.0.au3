@@ -16,7 +16,7 @@
 ;         ^^^^^^^^^^    ^^^^^^^^^^^     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^      ^^^^^^^^^^^^^       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 ;         SAP SYSTEM    SAP CLIENT      Source location				           Company code       No local archivation (if ommited files will be archived localy      Do not process subfolders (if ommited subfolders will be processed)        Arhive files to the sharepoint site
 ;Example Call #2
-;		  -s fq2 -c 105 -src https://volvogroup.sharepoint.com/sites/unit-hades/SI01_HADES_SOURCE -cc si01 -nal -nosub -as https://volvogroup.sharepoint.com/sites/unit-hades/SI01_HADES_ARCHIVE
+;		  -s fq2 -c 105 -src https://XXXXXXXXX.sharepoint.com/sites/XXXXXXX/SI01_HADES_SOURCE -cc si01 -nal -nosub -as https://XXXXXXXXXXXX/sites/XXXXXXXXXXXX/SI01_HADES_ARCHIVE
 ;Exit codes
 ;1-99 - Something other than errors e.g no parameters passed
 ;100 - General script errors
