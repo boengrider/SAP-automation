@@ -242,7 +242,7 @@ ConsoleWrite("Sharepoint access token: " & $SpAccessToken & @CRLF)
 Local $ResidualFiles = DirGetSize($AUTO_FOLDER_ROOT & "\" & StringUpper($CliParams[$CLI_COMPANYCODE]) & $PROJECT & "\" & StringUpper($CliParams[$CLI_COMPANYCODE]) & $PROJECT & "_" & $AUTO_FOLDER_SOURCE, $DIR_EXTENDED)
 If $ResidualFiles[1] > 0 Then
    LogEvent($LogFile, "Residual file (" & $ResidualFiles[1] & ") found in the local source location " & $AUTO_FOLDER_ROOT & "\" & StringUpper($CliParams[$CLI_COMPANYCODE]) & $PROJECT & "\" & StringUpper($CliParams[$CLI_COMPANYCODE]) & $PROJECT & "_" & $AUTO_FOLDER_SOURCE, True)
-    MessageToAdmin("E;" & @ScriptName & ";" & $CliParams[$CLI_SYSTEM],"Residual file(s) found in the local source. See the attached log file","tomas.ac@volvo.com", $LogFilePath)
+    MessageToAdmin("E;" & @ScriptName & ";" & $CliParams[$CLI_SYSTEM],"Residual file(s) found in the local source. See the attached log file", $SYS_ADMINS, $LogFilePath)
 	Exit(98)
 EndIf
 #EndRegion
