@@ -42,7 +42,7 @@ Const $AUTO_FOLDER_ROOT = "C:\!AUTO"
 Const $AUTO_FOLDER_SOURCE = "SOURCE"
 Const $AUTO_FOLDER_ARCHIVE = "ARCHIVE"
 Const $SAP_LOCAL_LANDSCAPE_PATH = @AppDataDir & "\SAP\Common\SAPUILandscape.xml"
-Const $SYS_ADMINS = "tomas.ac@volvo.com;tomas.chudik@volvo.com"
+Const $SYS_ADMINS = "jon.doe@company.com;jane.doe@company.com"
 #EndRegion
 
 #Region Variables
