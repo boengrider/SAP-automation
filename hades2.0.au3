@@ -11,10 +11,12 @@
 
 
 #Region About
-;Example Call
+;Example Call #1
 ;         -s fq2        -c 105          -src C:\!AUTO\SI01_HADES_DND_NET      -cc si01            -nal																 -nosub																		-as https://volvogroup.sharepoint.com/sites/unit-hades/SI01_HADES_ARCHIVE
 ;         ^^^^^^^^^^    ^^^^^^^^^^^     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^      ^^^^^^^^^^^^^       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 ;         SAP SYSTEM    SAP CLIENT      Source location				           Company code       No local archivation (if ommited files will be archived localy      Do not process subfolders (if ommited subfolders will be processed)        Arhive files to the sharepoint site
+;Example Call #2
+;		  -s fq2 -c 105 -src https://volvogroup.sharepoint.com/sites/unit-hades/SI01_HADES_SOURCE -cc si01 -nal -nosub -as https://volvogroup.sharepoint.com/sites/unit-hades/SI01_HADES_ARCHIVE
 ;Exit codes
 ;1-99 - Something other than errors e.g no parameters passed
 ;100 - General script errors
@@ -41,9 +43,6 @@ Const $AUTO_FOLDER_SOURCE = "SOURCE"
 Const $AUTO_FOLDER_ARCHIVE = "ARCHIVE"
 Const $SAP_LOCAL_LANDSCAPE_PATH = @AppDataDir & "\SAP\Common\SAPUILandscape.xml"
 Const $SYS_ADMINS = "tomas.ac@volvo.com;tomas.chudik@volvo.com"
-Const $SAP_FNOTFOUND_SHELL = 1  ; Work item ID not found in the shell
-Const $SAP_FNOTFOUND_REPORT = 2 ; Work item ID found in the shell but not in the report
-Const $SAP_FCORUPTED = 3        ; Work item ID found in the shell, found in the report but corrupted
 #EndRegion
 
 #Region Variables
@@ -239,7 +238,6 @@ ConsoleWrite("Sharepoint access token: " & $SpAccessToken & @CRLF)
 #EndRegion
 
 
-
 #Region check for residual file(s)
 Local $ResidualFiles = DirGetSize($AUTO_FOLDER_ROOT & "\" & StringUpper($CliParams[$CLI_COMPANYCODE]) & $PROJECT & "\" & StringUpper($CliParams[$CLI_COMPANYCODE]) & $PROJECT & "_" & $AUTO_FOLDER_SOURCE, $DIR_EXTENDED)
 If $ResidualFiles[1] > 0 Then
@@ -251,7 +249,7 @@ EndIf
 
 
 #Region Verify source location
-
+; Source is a local fodler or a unc path (net share)
 If StringRegExp($CliParams[$CLI_SOURCE], "(\\{2}[a-zA-Z0-9]*){1}\\.*") Or StringRegExp($CliParams[$CLI_SOURCE], "^[a-zA-Z]:\\[\\\S|*\S]?.*$", $STR_REGEXPMATCH) Then
    If Not FileExists($CliParams[$CLI_SOURCE]) Then
 	  LogEvent($LogFile, "Hades source folder does not exist", True)
@@ -263,7 +261,7 @@ If StringRegExp($CliParams[$CLI_SOURCE], "(\\{2}[a-zA-Z0-9]*){1}\\.*") Or String
 	  Exit(@error)
    EndIf
    $DataSource = $SOURCE_NETDRIVE
-
+; Source is a sharepoint site
 ElseIf StringRegExp($CliParams[$CLI_SOURCE], "(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})", $STR_REGEXPMATCH) Then
    $FileCount = SPFolderGetFileCount($Http, $CliParams[$CLI_SOURCE], $SpAccessToken, $CliParams[$CLI_SUBDIRS])
    If @error Then
@@ -279,10 +277,6 @@ If $FileCount = 0 Then
    MessageToAdmin("I;" & @ScriptName & ";" & $CliParams[$CLI_SYSTEM],"No files for processing found in the location: " & $CliParams[$CLI_SOURCE],"tomas.ac@volvo.com", $LogFilePath)
    Exit(2) ; Nothing to process
 EndIf
-
-
-ConsoleWrite("Data source type: " & $DataSource & @CRLF)
-ConsoleWrite("Files to process: " & $FileCount & @CRLF)
 
 #EndRegion
 
@@ -607,13 +601,12 @@ For $File In $FilesToProcess.Items
 Next
 #EndRegion
 
-#Region Cleanup
+#Region Final cleanup
 While WinExists($ExplorerTitle,"")
    WinKill($ExplorerTitle,"")
 WEnd
 FileDelete($LocalSourceFolder)
 $SAP[$SAP_CON].CloseConnection
-
 LogEvent($LogFile,"Calling Wdap()", False)
 Wdapp(StringUpper($CliParams[$CLI_COMPANYCODE]) & $PROJECT)
 LogEvent($LogFile,"DONE", True)
@@ -704,6 +697,7 @@ Func SPFolderGetFileCount(ByRef $_oHTTP, $_sSiteUrl, $_sSecurityToken, $_process
 		Return 0
 	EndIf
 
+	; Process files in the root directory
     If Not $_processSubdirs Then
 
 	  With $_oHTTP
@@ -723,6 +717,7 @@ Func SPFolderGetFileCount(ByRef $_oHTTP, $_sSiteUrl, $_sSecurityToken, $_process
 
 	  Return $__FileCount
 
+   ; Process subdirectories
    Else
 
 	  With $_oHTTP
@@ -838,11 +833,10 @@ Func SPFileUpload($token, $source, $destination, $prefix)
    Local $buffer = FileRead($hFile)
    Local $bufferLen = FileGetSize($source)
    FileClose($hFile)
-   ConsoleWrite("Request -> " & $destination & "_api/Web/GetFolderByServerRelativeUrl('" & $spfolder & "')/Files/add(overwrite=false, url='" & URLEncode($filename) & "')" & @CRLF)
+
    With $http
-		.open("POST",$destination & "_api/Web/GetFolderByServerRelativeUrl('" & $spfolder & "')/Files/add(overwrite=false, url='" & URLEncode($filename) & "')", False)
+		.open("POST",$destination & "_api/Web/GetFolderByServerRelativeUrl('" & $spfolder & "')/Files/add(overwrite=false, url='" & StringRegExpReplace($filename,"'","%27%27") & "')", False)
 		.setRequestHeader("accept", "application/json;odata=verbose")
-		;.setRequestHeader("X-RequestDigest", $_sXRequestDigest)
 		.setRequestHeader("Authorization", "Bearer " & $token)
 		.setRequestHeader("Content-Length", $bufferLen)
 		.send($buffer)
@@ -946,6 +940,8 @@ Func SAPSGetSystemDescription($_sSystemName)
 EndFunc
 
 Func SAPOpenConnection($_SystemName,$_ClientName,$_UserName)
+   ; Wait a bit so that sap logon is fully initialized otherwise we get 0x800401E4
+   Sleep(3000)
    Local $__SapGui =  ObjGet("SAPGUI")
    Local $__GuiApplication
    Local $__GuiSession
