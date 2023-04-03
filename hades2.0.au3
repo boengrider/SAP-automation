@@ -11,12 +11,13 @@
 
 
 #Region About
+; !!!!! Replace following token ----> REPLACE_WITH_YOUR_OWN_VALUE with your own values !!!!!
 ;Example Call #1
-;         -s fq2        -c 105          -src C:\!AUTO\SI01_HADES_DND_NET      -cc si01            -nal																 -nosub																		-as https://XXXXXXXXXXX.sharepoint.com/sites/XXXXXXXXXX/SI01_HADES_ARCHIVE
+;         -s fq2        -c 105          -src C:\!AUTO\SI01_HADES_DND_NET      -cc si01            -nal																 -nosub																		-as https://REPLACE_WITH_YOUR_OWN_VALUE.sharepoint.com/sites/REPLACE_WITH_YOUR_OWN_VALUE/SI01_HADES_ARCHIVE
 ;         ^^^^^^^^^^    ^^^^^^^^^^^     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^      ^^^^^^^^^^^^^       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 ;         SAP SYSTEM    SAP CLIENT      Source location				           Company code       No local archivation (if ommited files will be archived localy      Do not process subfolders (if ommited subfolders will be processed)        Arhive files to the sharepoint site
 ;Example Call #2
-;		  -s fq2 -c 105 -src https://XXXXXXXXX.sharepoint.com/sites/XXXXXXX/SI01_HADES_SOURCE -cc si01 -nal -nosub -as https://XXXXXXXXXXXX/sites/XXXXXXXXXXXX/SI01_HADES_ARCHIVE
+;		  -s fq2 -c 105 -src https://REPLACE_WITH_YOUR_OWN_VALUE.sharepoint.com/sites/REPLACE_WITH_YOUR_OWN_VALUE/SI01_HADES_SOURCE -cc si01 -nal -nosub -as https://REPLACE_WITH_YOUR_OWN_VALUE/sites/REPLACE_WITH_YOUR_OWN_VALUE/SI01_HADES_ARCHIVE
 ;Exit codes
 ;1-99 - Something other than errors e.g no parameters passed
 ;100 - General script errors
@@ -42,7 +43,7 @@ Const $AUTO_FOLDER_ROOT = "C:\!AUTO"
 Const $AUTO_FOLDER_SOURCE = "SOURCE"
 Const $AUTO_FOLDER_ARCHIVE = "ARCHIVE"
 Const $SAP_LOCAL_LANDSCAPE_PATH = @AppDataDir & "\SAP\Common\SAPUILandscape.xml"
-Const $SYS_ADMINS = "jon.doe@company.com;jane.doe@company.com"
+Const $SYS_ADMINS = "jon.doe@company.com;jane.doe@company.com" ; Replace with your own email
 #EndRegion
 
 #Region Variables
@@ -274,7 +275,7 @@ EndIf
 
 If $FileCount = 0 Then
    LogEvent($LogFile, "Nothing to process in the source location " & $CliParams[$CLI_SOURCE], True)
-   MessageToAdmin("I;" & @ScriptName & ";" & $CliParams[$CLI_SYSTEM],"No files for processing found in the location: " & $CliParams[$CLI_SOURCE],"tomas.ac@volvo.com", $LogFilePath)
+   MessageToAdmin("I;" & @ScriptName & ";" & $CliParams[$CLI_SYSTEM],"No files for processing found in the location: " & $CliParams[$CLI_SOURCE], $SYS_ADMINS, $LogFilePath)
    Exit(2) ; Nothing to process
 EndIf
 
@@ -865,7 +866,7 @@ EndFunc
 #Region Credentials
 Func GetCredentials($_resourceName)
    Local Enum $credentialUser = 0, $credentialPassword, $credentialDomain, $credentialHost ; 0,1,2,3
-   Local $__conectionString = "Provider=Microsoft.ACE.OLEDB.12.0;WSS;IMEX=1;RetrieveIds=Yes;DATABASE=https://volvogroup.sharepoint.com/sites/unit-rc-sk-bs-it/CREDENTIALS;LIST=CREDENTIALS;"
+   Local $__conectionString = "Provider=Microsoft.ACE.OLEDB.12.0;WSS;IMEX=1;RetrieveIds=Yes;DATABASE=https://REPLACE_WITH_YOUR_OWN_VALUE.sharepoint.com/sites/unit-rc-sk-bs-it/CREDENTIALS;LIST=CREDENTIALS;"
    Local $__adodbConnection = ObjCreate("Adodb.Connection")
    Local $__adodbRecordset  = ObjCreate("Adodb.Recordset")
    Local $__credentials[4]
@@ -1013,7 +1014,7 @@ EndFunc
    Local $oNET = ObjCreate("Wscript.Network")
 
    With $oHTTP
-	  .open("GET", "https://volvogroup.sharepoint.com/sites/unit-rc-sk-bs-it/_api/web/lists/getbytitle('WDAPP')/items?$select=Title&$filter=(Title eq '" & $sProjectName & "')", False)
+	  .open("GET", "https://REPLACE_WITH_YOUR_OWN_VALUE.sharepoint.com/sites/unit-rc-sk-bs-it/_api/web/lists/getbytitle('WDAPP')/items?$select=Title&$filter=(Title eq '" & $sProjectName & "')", False)
 	  .setRequestHeader("Authorization", "Bearer " & $SpAccessToken)
 	  .setRequestHeader("Accept", "application/atom+xml;odata=verbose")
 	  .send()
@@ -1071,7 +1072,7 @@ Func MessageToAdmin($_sSubject, $_sMessage, $_sAdmins, $_logfilePath)
 		.Subject = $_sSubject
 	    .AddAttachment($_logfilePath)
 		.Configuration.Fields.Item("http://schemas.microsoft.com/cdo/configuration/sendusing") = 2
-		.Configuration.Fields.Item("http://schemas.microsoft.com/cdo/configuration/smtpserver") = "mailgot.it.volvo.net"
+		.Configuration.Fields.Item("http://schemas.microsoft.com/cdo/configuration/smtpserver") = REPLACE_WITH_YOUR_OWN_VALUE
 		.Configuration.Fields.Item("http://schemas.microsoft.com/cdo/configuration/smtpserverport") = 25
 		.HTMLBody = $_sMessage
 		.Configuration.Fields.Item("urn:schemas:mailheader:X-MSMail-Priority") = "High"
