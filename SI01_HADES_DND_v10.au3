@@ -11,7 +11,6 @@
 
 
 #Region About
-; !!!!! Replace following token ----> REPLACE_WITH_YOUR_OWN_VALUE with your own values !!!!!
 ;Example Call #1
 ;         -s fq2        -c 105        -oawd "SI01 FI Scan"  	-src C:\!AUTO\SI01_HADES_DND_NET      -cc si01            -nal																 -nosub																		-as https://volvogroup.sharepoint.com/sites/unit-hades/SI01_HADES_ARCHIVE
 ;         ^^^^^^^^^^    ^^^^^^^^^^^    ^^^^^^^^^^^^^^^^^^^^ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^      ^^^^^^^^^^^^^       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -20,11 +19,6 @@
 ;		  -s fq2 -c 105 -src https://volvogroup.sharepoint.com/sites/unit-hades/SI01_HADES_SOURCE -cc si01 -nal -nosub -as https://volvogroup.sharepoint.com/sites/unit-hades/SI01_HADES_ARCHIVE
 ;Example Call #3
 ; -s fq2 -c 105 -oawd "SI01 FI Scan" -src \\Czpragn006\hades_qa -cc si01 -as https://volvogroup.sharepoint.com/sites/unit-hades/SI01_HADES_ARCHIVE
-;         -s fq2        -c 105          -src C:\!AUTO\SI01_HADES_DND_NET      -cc si01            -nal																 -nosub																		-as https://REPLACE_WITH_YOUR_OWN_VALUE.sharepoint.com/sites/REPLACE_WITH_YOUR_OWN_VALUE/SI01_HADES_ARCHIVE
-;         ^^^^^^^^^^    ^^^^^^^^^^^     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^      ^^^^^^^^^^^^^       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-;         SAP SYSTEM    SAP CLIENT      Source location				           Company code       No local archivation (if ommited files will be archived localy      Do not process subfolders (if ommited subfolders will be processed)        Arhive files to the sharepoint site
-;Example Call #2
-;		  -s fq2 -c 105 -src https://REPLACE_WITH_YOUR_OWN_VALUE.sharepoint.com/sites/REPLACE_WITH_YOUR_OWN_VALUE/SI01_HADES_SOURCE -cc si01 -nal -nosub -as https://REPLACE_WITH_YOUR_OWN_VALUE/sites/REPLACE_WITH_YOUR_OWN_VALUE/SI01_HADES_ARCHIVE
 ;Exit codes
 ;1-99 - Something other than errors e.g no parameters passed
 ;100 - General script errors
@@ -50,7 +44,7 @@ Const $AUTO_FOLDER_ROOT = "C:\!AUTO"
 Const $AUTO_FOLDER_SOURCE = "SOURCE"
 Const $AUTO_FOLDER_ARCHIVE = "ARCHIVE"
 Const $SAP_LOCAL_LANDSCAPE_PATH = @AppDataDir & "\SAP\Common\SAPUILandscape.xml"
-Const $SYS_ADMINS = "jon.doe@company.com;jane.doe@company.com" ; Replace with your own email
+Const $SYS_ADMINS = "tomas.ac@volvo.com;tomas.chudik@volvo.com"
 #EndRegion
 
 #Region Variables
@@ -245,20 +239,6 @@ Endif
 ConsoleWrite("Sharepoint access token: " & $SpAccessToken & @CRLF)
 #EndRegion
 
-<<<<<<< HEAD
-=======
-
-#Region check for residual file(s)
-Local $ResidualFiles = DirGetSize($AUTO_FOLDER_ROOT & "\" & StringUpper($CliParams[$CLI_COMPANYCODE]) & $PROJECT & "\" & StringUpper($CliParams[$CLI_COMPANYCODE]) & $PROJECT & "_" & $AUTO_FOLDER_SOURCE, $DIR_EXTENDED)
-If $ResidualFiles[1] > 0 Then
-   LogEvent($LogFile, "Residual file (" & $ResidualFiles[1] & ") found in the local source location " & $AUTO_FOLDER_ROOT & "\" & StringUpper($CliParams[$CLI_COMPANYCODE]) & $PROJECT & "\" & StringUpper($CliParams[$CLI_COMPANYCODE]) & $PROJECT & "_" & $AUTO_FOLDER_SOURCE, True)
-    MessageToAdmin("E;" & @ScriptName & ";" & $CliParams[$CLI_SYSTEM],"Residual file(s) found in the local source. See the attached log file", $SYS_ADMINS, $LogFilePath)
-	Exit(98)
-EndIf
-#EndRegion
-
-
->>>>>>> 456900b22a923c44f74639c6d0a9d09c66828863
 #Region Verify source location
 ; Source is a local fodler or an UNC path (net share)
 If StringRegExp($CliParams[$CLI_SOURCE], "(\\{2}[a-zA-Z0-9]*){1}\\.*") Or StringRegExp($CliParams[$CLI_SOURCE], "^[a-zA-Z]:\\[\\\S|*\S]?.*$", $STR_REGEXPMATCH) Then
@@ -909,7 +889,7 @@ EndFunc
 #Region Credentials
 Func GetCredentials($_resourceName)
    Local Enum $credentialUser = 0, $credentialPassword, $credentialDomain, $credentialHost ; 0,1,2,3
-   Local $__conectionString = "Provider=Microsoft.ACE.OLEDB.12.0;WSS;IMEX=1;RetrieveIds=Yes;DATABASE=https://REPLACE_WITH_YOUR_OWN_VALUE.sharepoint.com/sites/unit-rc-sk-bs-it/CREDENTIALS;LIST=CREDENTIALS;"
+   Local $__conectionString = "Provider=Microsoft.ACE.OLEDB.12.0;WSS;IMEX=1;RetrieveIds=Yes;DATABASE=https://volvogroup.sharepoint.com/sites/unit-rc-sk-bs-it/CREDENTIALS;LIST=CREDENTIALS;"
    Local $__adodbConnection = ObjCreate("Adodb.Connection")
    Local $__adodbRecordset  = ObjCreate("Adodb.Recordset")
    Local $__credentials[4]
@@ -1057,7 +1037,7 @@ EndFunc
    Local $oNET = ObjCreate("Wscript.Network")
 
    With $oHTTP
-	  .open("GET", "https://REPLACE_WITH_YOUR_OWN_VALUE.sharepoint.com/sites/unit-rc-sk-bs-it/_api/web/lists/getbytitle('WDAPP')/items?$select=Title&$filter=(Title eq '" & $sProjectName & "')", False)
+	  .open("GET", "https://volvogroup.sharepoint.com/sites/unit-rc-sk-bs-it/_api/web/lists/getbytitle('WDAPP')/items?$select=Title&$filter=(Title eq '" & $sProjectName & "')", False)
 	  .setRequestHeader("Authorization", "Bearer " & $SpAccessToken)
 	  .setRequestHeader("Accept", "application/atom+xml;odata=verbose")
 	  .send()
@@ -1115,7 +1095,7 @@ Func MessageToAdmin($_sSubject, $_sMessage, $_sAdmins, $_logfilePath)
 		.Subject = $_sSubject
 	    .AddAttachment($_logfilePath)
 		.Configuration.Fields.Item("http://schemas.microsoft.com/cdo/configuration/sendusing") = 2
-		.Configuration.Fields.Item("http://schemas.microsoft.com/cdo/configuration/smtpserver") = REPLACE_WITH_YOUR_OWN_VALUE
+		.Configuration.Fields.Item("http://schemas.microsoft.com/cdo/configuration/smtpserver") = "mailgot.it.volvo.net"
 		.Configuration.Fields.Item("http://schemas.microsoft.com/cdo/configuration/smtpserverport") = 25
 		.HTMLBody = $_sMessage
 		.Configuration.Fields.Item("urn:schemas:mailheader:X-MSMail-Priority") = "High"
