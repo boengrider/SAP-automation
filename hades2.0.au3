@@ -12,11 +12,13 @@
 
 #Region About
 ;Example Call #1
-;         -s fq2        -c 105          -src C:\!AUTO\SI01_HADES_DND_NET      -cc si01            -nal																 -nosub																		-as https://volvogroup.sharepoint.com/sites/unit-hades/SI01_HADES_ARCHIVE
-;         ^^^^^^^^^^    ^^^^^^^^^^^     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^      ^^^^^^^^^^^^^       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-;         SAP SYSTEM    SAP CLIENT      Source location				           Company code       No local archivation (if ommited files will be archived localy      Do not process subfolders (if ommited subfolders will be processed)        Arhive files to the sharepoint site
+;         -s fq2        -c 105        -oawd "SI01 FI Scan"  	-src C:\!AUTO\SI01_HADES_DND_NET      -cc si01            -nal																 -nosub																		-as https://volvogroup.sharepoint.com/sites/unit-hades/SI01_HADES_ARCHIVE
+;         ^^^^^^^^^^    ^^^^^^^^^^^    ^^^^^^^^^^^^^^^^^^^^ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^      ^^^^^^^^^^^^^       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+;         SAP SYSTEM    SAP CLIENT      Oawd folder				Source location				           Company code       No local archivation (if ommited files will be archived localy      Do not process subfolders (if ommited subfolders will be processed)        Arhive files to the sharepoint site
 ;Example Call #2
 ;		  -s fq2 -c 105 -src https://volvogroup.sharepoint.com/sites/unit-hades/SI01_HADES_SOURCE -cc si01 -nal -nosub -as https://volvogroup.sharepoint.com/sites/unit-hades/SI01_HADES_ARCHIVE
+;Example Call #3
+; -s fq2 -c 105 -oawd "SI01 FI Scan" -src \\Czpragn006\hades_qa -cc si01 -as https://volvogroup.sharepoint.com/sites/unit-hades/SI01_HADES_ARCHIVE
 ;Exit codes
 ;1-99 - Something other than errors e.g no parameters passed
 ;100 - General script errors
@@ -29,13 +31,13 @@
 #Region Constants
 Enum $SAP_APP = 0, $SAP_CON, $SAP_SES
 Enum $CRED_USER = 0, $CRED_PASSWORD, $CRED_DOMAIN, $CRED_HOST; 0,1,2,3
-Enum $CLI_SYSTEM = 0, $CLI_CLIENT, $CLI_ARCHIVESHAREPOINT, $CLI_ARCHIVESHAREPOINTURL, $CLI_SOURCE, $CLI_ARCHIVELOCAL, $CLI_COMPANYCODE, $CLI_SUBDIRS ; 0,1,2,3,4,5,6,7
+Enum $CLI_SYSTEM = 0, $CLI_CLIENT, $CLI_ARCHIVESHAREPOINT, $CLI_ARCHIVESHAREPOINTURL, $CLI_SOURCE, $CLI_ARCHIVELOCAL, $CLI_COMPANYCODE, $CLI_SUBDIRS, $CLI_OAWDFOLDER ; 0,1,2,3,4,5,6,7
 Enum $SOURCE_UNKNOWN = 0, $SOURCE_NETDRIVE, $SOURCE_SHAREPOINT; 0,1,2 Source type
 Enum $FILE_PARENTFOLDER = 0, $FILE_PATH, $FILE_NAME, $FILE_SIZE, $FILE_SOURCETYPE, $FILE_STATUS; File status, File parent subfolder in case name is constructed from subfolder and file names, Full file path or URL if it's sharepoint , Source type i.e net drive or sharepoint
 Enum $STATE_INTIAL = 0, $STATE_COPYBEGIN, $STATE_ALREADYEXISTS, $STATE_COPIED, $STATE_DRAGDROPREADY, $STATE_DRAGDROPPED, $STATE_OK, $STATE_INVALID, $STATE_PROCESSED, $STATE_DRAGDROPBEGIN, $STATE_DRAGDROPFAILED, $STATE_ARCHIVELOCALBEGIN, $STATE_ARCHIVEDLOCAL, $STATE_ARCHIVESPBEGIN, $STATE_ARCHIVEDSP, $STATE_DELETEREMOTEBEGIN, $STATE_DELETEDREMOTE
 ;Const $MAX_SIZEINBYTES = -1 ; Unlimited
 Const $MAX_SIZEINBYTES = 10485760
-Const $MANDATORY_PARAMS = -4
+Const $MANDATORY_PARAMS = -5
 Const $RESOURCE_NAME = "SPRESTAPI"
 Const $PROJECT = "_HADES_DND" ; Company code is prepended
 Const $AUTO_FOLDER_ROOT = "C:\!AUTO"
@@ -63,12 +65,9 @@ Local $User = ObjGet("LDAP://" & $SysInfo.UserName)
 Local $Net = ObjCreate("Wscript.Network")
 Local $Http = ObjCreate("winhttp.winhttprequest.5.1")
 Local $FilesToProcess = ObjCreate("Scripting.Dictionary")
-Local $OawdFolders = ObjCreate("Scripting.Dictionary")
-$OawdFolders.Add("CZ02", "CZ02 FI Scanning")
-$OawdFolders.Add("SI01", "SI01 FI Scan")
 Local $SAP[3] = [Null,Null,Null]
 Local $Credentials[4] = [Null,Null,Null,Null] ; Array holding credentials
-Local $CliParams[8] = [Null,Null,False,Null,Null,True,Null,True] ; Array holding command line parameters. For order of values refer to the $CLI Enum
+Local $CliParams[9] = [Null,Null,False,Null,Null,True,Null,True,Null] ; Array holding command line parameters. For order of values refer to the $CLI Enum
 Local $FileState[17] = ["INTIAL", "COPYBEGIN", "ALREADYEXISTS", "COPIED", "DRAGDROPREADY", "DRAGDROPPED", "VALID", "INVALID", "PROCESSED", "DRAGDROPBEGIN", "DRAGDROPFAILED", "ARCHIVELOCALBEGIN", "ARCHIVEDLOCAL", "ARCHIVESPBEGIN", "ARCHIVEDSP", "DELETEREMOTEBEGIN", "DELETEDREMOTE"]
 Local $ActualParamsPassed = 1 ; Initially 1. Shift to the right each time a mandatory parameter is present. We should end up with 1 >> NUMBER_OF_MANDATORY_PARAMETERS
 #EndRegion
@@ -83,12 +82,16 @@ EndIf
 
 
 
-
-
 #Region Process command line parameters
 For $arg = 1 To $CmdLine[0]
 
    Switch StringUpper($CmdLine[$arg])
+
+   Case "-OAWD"
+	  If $CmdLine[0] > $arg Then
+		 $CliParams[$CLI_OAWDFOLDER] = $CmdLine[$arg + 1]
+		 $ActualParamsPassed = BitShift($ActualParamsPassed,-1)
+	  EndIf
 
    Case "-NOSUB"
 	  $CliParams[$CLI_SUBDIRS] = False
@@ -188,18 +191,16 @@ Else
    ConsoleWrite("Company code: " & $CliParams[$CLI_COMPANYCODE] & @CRLF)
    ConsoleWrite("SAP System: " & $CliParams[$CLI_SYSTEM] & @CRLF)
    ConsoleWrite("SAP Client: " & $CliParams[$CLI_CLIENT] & @CRLF)
+   ConsoleWrite("OAWD Folder: " & $CliParams[$CLI_OAWDFOLDER] & @CRLF)
    ConsoleWrite("Source: " & $CliParams[$CLI_SOURCE] & @CRLF)
    ConsoleWrite("Process sub directories: " & $CliParams[$CLI_SUBDIRS] & @CRLF)
    ConsoleWrite("Archive to Sharepoint: " & $CliParams[$CLI_ARCHIVESHAREPOINT] & " ( " & $CliParams[$CLI_ARCHIVESHAREPOINTURL] & " )" & @CRLF)
    ConsoleWrite("Archive locally: " & $CliParams[$CLI_ARCHIVELOCAL] & @CRLF)
 EndIf
-
 #EndRegion
 
 
 #Region Build local folder structure
-;DirCreate(@AppDataDir & "\HADES\" & StringUpper($CliParams[$CLI_COMPANYCODE]))
-;$LogFile = FileOpen(@AppDataDir & "\HADES\" & StringUpper($CliParams[$CLI_COMPANYCODE]) & "\" & $RunTimeStamp & ".log.txt", $FO_APPEND)
 DirCreate($AUTO_FOLDER_ROOT & "\" & StringUpper($CliParams[$CLI_COMPANYCODE]) & $PROJECT)
 DirCreate($AUTO_FOLDER_ROOT & "\" & StringUpper($CliParams[$CLI_COMPANYCODE]) & $PROJECT & "\" & StringUpper($CliParams[$CLI_COMPANYCODE]) & $PROJECT & "_" & $AUTO_FOLDER_SOURCE)
 DirCreate($AUTO_FOLDER_ROOT & "\" & StringUpper($CliParams[$CLI_COMPANYCODE]) & $PROJECT & "\" & StringUpper($CliParams[$CLI_COMPANYCODE]) & $PROJECT & "_" & $AUTO_FOLDER_ARCHIVE)
@@ -215,6 +216,7 @@ LogEvent($LogFile, "CLI parameters", False)
 LogEvent($LogFile, "Company code: " & $CliParams[$CLI_COMPANYCODE], False)
 LogEvent($LogFile, "SAP System: " & $CliParams[$CLI_SYSTEM], False)
 LogEvent($LogFile, "SAP Client: " & $CliParams[$CLI_CLIENT], False)
+LogEvent($LogFile, "OAWD Folder: " & $CliParams[$CLI_OAWDFOLDER], False)
 LogEvent($LogFile, "Source: " & $CliParams[$CLI_SOURCE], False)
 LogEvent($LogFile, "Process sub directories: " & $CliParams[$CLI_SUBDIRS], False)
 LogEvent($LogFile, "Archive to Sharepoint: " & $CliParams[$CLI_ARCHIVESHAREPOINT] & " ( " & $CliParams[$CLI_ARCHIVESHAREPOINTURL] & " )", False)
@@ -237,27 +239,20 @@ Endif
 ConsoleWrite("Sharepoint access token: " & $SpAccessToken & @CRLF)
 #EndRegion
 
-
-#Region check for residual file(s)
-Local $ResidualFiles = DirGetSize($AUTO_FOLDER_ROOT & "\" & StringUpper($CliParams[$CLI_COMPANYCODE]) & $PROJECT & "\" & StringUpper($CliParams[$CLI_COMPANYCODE]) & $PROJECT & "_" & $AUTO_FOLDER_SOURCE, $DIR_EXTENDED)
-If $ResidualFiles[1] > 0 Then
-   LogEvent($LogFile, "Residual file (" & $ResidualFiles[1] & ") found in the local source location " & $AUTO_FOLDER_ROOT & "\" & StringUpper($CliParams[$CLI_COMPANYCODE]) & $PROJECT & "\" & StringUpper($CliParams[$CLI_COMPANYCODE]) & $PROJECT & "_" & $AUTO_FOLDER_SOURCE, True)
-    MessageToAdmin("E;" & @ScriptName & ";" & $CliParams[$CLI_SYSTEM],"Residual file(s) found in the local source. See the attached log file","tomas.ac@volvo.com", $LogFilePath)
-	Exit(98)
-EndIf
-#EndRegion
-
-
 #Region Verify source location
-; Source is a local fodler or a unc path (net share)
+; Source is a local fodler or an UNC path (net share)
 If StringRegExp($CliParams[$CLI_SOURCE], "(\\{2}[a-zA-Z0-9]*){1}\\.*") Or StringRegExp($CliParams[$CLI_SOURCE], "^[a-zA-Z]:\\[\\\S|*\S]?.*$", $STR_REGEXPMATCH) Then
    If Not FileExists($CliParams[$CLI_SOURCE]) Then
-	  LogEvent($LogFile, "Hades source folder does not exist", True)
+	  LogEvent($LogFile, "Hades source folder does not exist", False)
+	  LogEvent($LogFile, "Failed", True)
+	  MessageToAdmin("E;" & @ScriptName & ";" & $CliParams[$CLI_SYSTEM],"Exception occured. See the attached log file", $SYS_ADMINS, $LogFilePath)
 	  Exit(101) ; Source folder does not exist
    EndIf
 
    $FileCount = NSFolderGetFileCount($CliParams[$CLI_SOURCE], $CliParams[$CLI_SUBDIRS], $FilesToProcess)
    If @error Then
+	  LogEvent($LogFile, "Failed", True)
+	  MessageToAdmin("E;" & @ScriptName & ";" & $CliParams[$CLI_SYSTEM],"Exception occured. See the attached log file", $SYS_ADMINS, $LogFilePath)
 	  Exit(@error)
    EndIf
    $DataSource = $SOURCE_NETDRIVE
@@ -265,8 +260,12 @@ If StringRegExp($CliParams[$CLI_SOURCE], "(\\{2}[a-zA-Z0-9]*){1}\\.*") Or String
 ElseIf StringRegExp($CliParams[$CLI_SOURCE], "(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})", $STR_REGEXPMATCH) Then
    $FileCount = SPFolderGetFileCount($Http, $CliParams[$CLI_SOURCE], $SpAccessToken, $CliParams[$CLI_SUBDIRS])
    If @error Then
+	  LogEvent($LogFile, "Failed", True)
+	  MessageToAdmin("E;" & @ScriptName & ";" & $CliParams[$CLI_SYSTEM],"Exception occured. See the attached log file", $SYS_ADMINS, $LogFilePath)
 	  Exit(@error) ; Sharepoint library/folder does not exist
    ElseIf $FileCount < 0 Then
+	  LogEvent($LogFile, "Failed", True)
+	  MessageToAdmin("E;" & @ScriptName & ";" & $CliParams[$CLI_SYSTEM],"Exception occured. See the attached log file", $SYS_ADMINS, $LogFilePath)
 	  Exit(102) ; Unkown error while getting file count in the SP library
    EndIf
    $DataSource = $SOURCE_SHAREPOINT
@@ -274,15 +273,24 @@ EndIf
 
 If $FileCount = 0 Then
    LogEvent($LogFile, "Nothing to process in the source location " & $CliParams[$CLI_SOURCE], True)
-   MessageToAdmin("I;" & @ScriptName & ";" & $CliParams[$CLI_SYSTEM],"No files for processing found in the location: " & $CliParams[$CLI_SOURCE],"tomas.ac@volvo.com", $LogFilePath)
+   MessageToAdmin("I;" & @ScriptName & ";" & $CliParams[$CLI_SYSTEM],"No files for processing found in the location: " & $CliParams[$CLI_SOURCE], $SYS_ADMINS, $LogFilePath)
    Exit(2) ; Nothing to process
 EndIf
 
+LogEvent($LogFile, $FileCount & " file(s) discovered", False)
 #EndRegion
 
 
-#Region SAP initialization
+#Region check for residual file(s)
+Local $ResidualFiles = DirGetSize($AUTO_FOLDER_ROOT & "\" & StringUpper($CliParams[$CLI_COMPANYCODE]) & $PROJECT & "\" & StringUpper($CliParams[$CLI_COMPANYCODE]) & $PROJECT & "_" & $AUTO_FOLDER_SOURCE, $DIR_EXTENDED)
+If $ResidualFiles[1] > 0 Then
+   LogEvent($LogFile, "Residual file (" & $ResidualFiles[1] & ") found in the local source location " & $AUTO_FOLDER_ROOT & "\" & StringUpper($CliParams[$CLI_COMPANYCODE]) & $PROJECT & "\" & StringUpper($CliParams[$CLI_COMPANYCODE]) & $PROJECT & "_" & $AUTO_FOLDER_SOURCE, True)
+    MessageToAdmin("E;" & @ScriptName & ";" & $CliParams[$CLI_SYSTEM],"Residual file(s) found in the local source. See the attached log file", $SYS_ADMINS, $LogFilePath)
+	Exit(98)
+EndIf
+#EndRegion
 
+#Region SAP initialization
 If Not SAPLaunchSAPLogon($PidSapLogon) Then
    ConsoleWrite("SAP Logon couldn't be launched")
    Exit(200) ; SAP Logon couldn't be launched
@@ -328,7 +336,7 @@ SAPKillPopups($SessionCWID)
 LogEvent($LogFile, "Executing transaction '" & $SessionCWID.Info.Transaction & "' in the session '" & $SessionCWID.Name, False)
 
 $SessionOAWD.findById("wnd[0]").sendVKey(71)	;Ctrl+F to find string
-$SessionOAWD.findById("wnd[1]/usr/txtRSYSF-STRING").text = $OawdFolders.Item(StringUpper($CliParams[$CLI_COMPANYCODE]))
+$SessionOAWD.findById("wnd[1]/usr/txtRSYSF-STRING").text = $CliParams[$CLI_OAWDFOLDER]
 $SessionOAWD.findById("wnd[1]").sendVKey(0)	;Enter key
 $SessionOAWD.findById("wnd[2]").sendVKey(84)	;Ctrl+G to point to the searched string
 $SessionOAWD.findById("wnd[2]").sendVKey(2)	;F2 key to select the pointed string and return to previous wnd
@@ -387,7 +395,7 @@ Local $LocalSourceFolder = $AUTO_FOLDER_ROOT & "\" & StringUpper($CliParams[$CLI
 LogEvent($LogFile, "-------------------------------------------------------", False)
 For $File In $FilesToProcess.Items
    ; **********************************************************************
-   ;Before each loop there should be no file in the local source directory
+   ; Before each loop there should be no file in the local source directory
    ; **********************************************************************
    $ResidualFiles = DirGetSize($AUTO_FOLDER_ROOT & "\" & StringUpper($CliParams[$CLI_COMPANYCODE]) & $PROJECT & "\" & StringUpper($CliParams[$CLI_COMPANYCODE]) & $PROJECT & "_" & $AUTO_FOLDER_SOURCE, $DIR_EXTENDED)
    If $ResidualFiles[1] > 0 Then
@@ -489,10 +497,17 @@ For $File In $FilesToProcess.Items
    ; *****************************************************************
    ;Drag & Drop
    If $File[$FILE_STATUS] = $STATE_DRAGDROPREADY Then
+
+	  If $CliParams[$CLI_SUBDIRS] Then
+		 $Note = StringLeft($File[$FILE_PARENTFOLDER] & "_" & $File[$FILE_NAME],50)
+	  Else
+		 $Note = StringLeft($File[$FILE_NAME],50)
+	  Endif
+
 	  $File[$FILE_STATUS] = $STATE_DRAGDROPBEGIN
 	  LogEvent($LogFile, $File[$FILE_NAME] & " (" & $File[$FILE_PARENTFOLDER] & ") (" & $FileState[$File[$FILE_STATUS]] & ")", False)
-
-	  $DropResult = DragDrop($SessionOAWD, $ExplorerWindowTitle)
+	  LogEvent($LogFile, "Calling DragDrop() function. Note: " & $Note, False)
+	  $DropResult = DragDrop($SessionOAWD, $ExplorerWindowTitle, $Note)
 
 	  If StringRegExp($DropResult, "Action completed") Then
 		 $File[$FILE_STATUS] = $STATE_DRAGDROPPED
@@ -626,23 +641,28 @@ Func NSFolderGetFileCount($_sNetworkPath, $_processSubdirs, ByRef $_dFilesToProc
    Local $File
    Local $__SubfoldersCount = 0
 
-   ; Subfolders
+   ;Subfolders
    If $_processSubdirs And $Folder.Subfolders.Count = 0 Then
-	  SetError(105) ; Subdirectories processing requested but no matching subfolders found
+	  LogEvent($LogFile, "No subfolders for processing. Stopping execution", False)
+	  SetError(105) ; Subdirectories processing requested but no subfolders found
 	  Return 0
    ElseIf $_processSubdirs And $Folder.Subfolders.Count >= 1 Then
 	  For $Subfolder in $Folder.Subfolders
 		 If StringRegExp($Subfolder.Name,StringUpper($CliParams[$CLI_COMPANYCODE])) Then
 			$__SubfoldersCount = $__SubfoldersCount + 1
 			For $File In $Subfolder.Files
-
 			   ;$FILE_PARENTFOLDER = 0, $FILE_PATH, $FILE_NAME, $FILE_SIZE, $FILE_SOURCETYPE, $FILE_STATUS
 			   Local $__filePropertiesArray[6] = [$File.ParentFolder.Name, $File.Path, $File.Name, $File.Size, $SOURCE_NETDRIVE, $STATE_INTIAL]
 			    $_dFilesToProcess.Add($Subfolder.Name & "_" & $File.Name, $__filePropertiesArray)
-
 			Next
 		 EndIf
 	  Next
+
+	  If $__SubfoldersCount <= 0 Then
+		 LogEvent($LogFile, "No subfolders matching company code found. Stopping execution", False)
+		 SetError(105)
+		 Return 0
+	  EndIf
 
 	  Return $_dFilesToProcess.Count
    EndIf
@@ -693,6 +713,7 @@ Func SPFolderGetFileCount(ByRef $_oHTTP, $_sSiteUrl, $_sSecurityToken, $_process
 
 	If $_oHTTP.status == 404 Then
 		; Folder not found and @error is set
+		LogEvent($LogFile, "Sharepoint directory '" & $__SharepointDir & "' not found", False)
 		SetError(305) ; Folder not found
 		Return 0
 	EndIf
@@ -708,6 +729,7 @@ Func SPFolderGetFileCount(ByRef $_oHTTP, $_sSiteUrl, $_sSecurityToken, $_process
 	  EndWith
 
 	  If $_oHTTP.status <> 200 Then
+	    LogEvent($LogFile, "HTTP Response: " & $_oHTTP.responseText, False)
 		SetError(306) ;Cant obtain files
 		Return 0
 	  EndIf
@@ -728,6 +750,7 @@ Func SPFolderGetFileCount(ByRef $_oHTTP, $_sSiteUrl, $_sSecurityToken, $_process
 	 EndWith
 
 	 If $_oHTTP.status <> 200 Then
+		LogEvent($LogFile, "HTTP Response: " & $_oHTTP.responseText, False)
 		SetError(307) ;Can't obtain subfolders
 		Return 0
 	 EndIf
@@ -746,6 +769,7 @@ Func SPFolderGetFileCount(ByRef $_oHTTP, $_sSiteUrl, $_sSecurityToken, $_process
 	  Next
 
 	  If $__SubfoldersCount = 0 And $_processSubdirs Then
+		 LogEvent($LogFile, "No subfolders matching company code found. Stopping execution", False)
 		 SetError(308) ; Subfolders processing requested but no subfolders found
 		 Return(0)
 	  Endif
@@ -1135,13 +1159,16 @@ EndFunc
 #EndRegion
 
 #Region DragDrop
-Func DragDrop($SapSession, $ExplorerWindow)
+Func DragDrop($SapSession, $ExplorerWindow, $Note)
     Local $__aMSize ; Main area position w/o navigation pane
 	Local $__aESize ; Window position including navigation pane
 	Local $__aASize ; SAP Archive from Frontend window position
 	Local $__win = $SapSession.Children.Item(1)
 	Local $__result
 
+    LogEvent($LogFile, "Inside DragDrop(). Note passed to the function: " & $Note, False)
+
+	$__win.findById("usr/txtCONFIRM_DATA-NOTE").text = $Note
     $__aMSize = ControlGetPos($ExplorerWindow,"","DirectUIHWND2")
 	$__aESize = WinGetPos($ExplorerWindow,"")
 
