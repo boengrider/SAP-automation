@@ -13,13 +13,13 @@
 #Region About
 ; !!!!! Replace following token ----> REPLACE_WITH_YOUR_OWN_VALUE with your own values !!!!!
 ;Example Call #1
-;         -s fq2        -c 105        -oawd "SI01 FI Scan"  	-src C:\!AUTO\SI01_HADES_DND_NET      -cc si01            -nal																 -nosub																		-as https://volvogroup.sharepoint.com/sites/unit-hades/SI01_HADES_ARCHIVE
+;         -s fq2        -c 105        -oawd "SI01 FI Scan"  	-src C:\!AUTO\SI01_HADES_DND_NET      -cc si01            -nal																 -nosub																		-as https://REPLACE_WITH_YOUR_OWN_VALUE.sharepoint.com/sites/unit-hades/SI01_HADES_ARCHIVE
 ;         ^^^^^^^^^^    ^^^^^^^^^^^    ^^^^^^^^^^^^^^^^^^^^ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^      ^^^^^^^^^^^^^       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 ;         SAP SYSTEM    SAP CLIENT      Oawd folder				Source location				           Company code       No local archivation (if ommited files will be archived localy      Do not process subfolders (if ommited subfolders will be processed)        Arhive files to the sharepoint site
 ;Example Call #2
-;		  -s fq2 -c 105 -src https://volvogroup.sharepoint.com/sites/unit-hades/SI01_HADES_SOURCE -cc si01 -nal -nosub -as https://volvogroup.sharepoint.com/sites/unit-hades/SI01_HADES_ARCHIVE
+;		  -s fq2 -c 105 -src https://REPLACE_WITH_YOUR_OWN_VALUE.sharepoint.com/sites/unit-hades/SI01_HADES_SOURCE -cc si01 -nal -nosub -as https://REPLACE_WITH_YOUR_OWN_VALUE.sharepoint.com/sites/unit-hades/SI01_HADES_ARCHIVE
 ;Example Call #3
-; -s fq2 -c 105 -oawd "SI01 FI Scan" -src \\Czpragn006\hades_qa -cc si01 -as https://volvogroup.sharepoint.com/sites/unit-hades/SI01_HADES_ARCHIVE
+; -s fq2 -c 105 -oawd "SI01 FI Scan" -src \\Czpragn006\hades_qa -cc si01 -as https://REPLACE_WITH_YOUR_OWN_VALUE.sharepoint.com/sites/unit-hades/SI01_HADES_ARCHIVE
 ;         -s fq2        -c 105          -src C:\!AUTO\SI01_HADES_DND_NET      -cc si01            -nal																 -nosub																		-as https://REPLACE_WITH_YOUR_OWN_VALUE.sharepoint.com/sites/REPLACE_WITH_YOUR_OWN_VALUE/SI01_HADES_ARCHIVE
 ;         ^^^^^^^^^^    ^^^^^^^^^^^     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^      ^^^^^^^^^^^^^       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 ;         SAP SYSTEM    SAP CLIENT      Source location				           Company code       No local archivation (if ommited files will be archived localy      Do not process subfolders (if ommited subfolders will be processed)        Arhive files to the sharepoint site
