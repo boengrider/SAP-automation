@@ -1,1 +1,0 @@
-"C:\Program Files (x86)\AutoIt3\autoit3.exe" "C:\Users\a293793\OneDrive - Volvo Group\GitHub\autoit_SAP\hades2.0.au3" -s FQ2  -c 105  -src H:\SI01_HADES_DND_NET  -cc SI01  -nal  -nosub  -as https://volvogroup.sharepoint.com/sites/unit-hades/SI01_HADES_ARCHIVE
