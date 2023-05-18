@@ -43,7 +43,76 @@ HADES.au3 -s|--system -c|--client -src|--source -cc|--companycode -oawd [-nosub|
 300 - Sharepoint related errors
 ```  
 
+## How it works  
 
-![Alt text](image link)
+Script processes in one-at-a-time fashion. Each file goes through multiple states and is considered processed only when it reaches the final state.
+
+Each file in the source location has its initial state STATE_INTIAL   
+
+We then check whether the file does not exceed the size limit and is of a accepted file type, .pdf in this case   
+If the file satisfies these two conditions it's moved to the STATE_OK state, otherwise it's stated is STATE_INVALID  
+```autoit
+If $File[$FILE_SIZE] >= $MAX_SIZEINBYTES Then
+	  If $MAX_SIZEINBYTES <> -1 Then
+		 $InvalidFiles = $InvalidFiles + 1
+		 LogEvent($LogFile, $File[$FILE_NAME] & " (" & $File[$FILE_PARENTFOLDER] & ") (" & $FileState[$File[$FILE_STATUS]] & ")", False)
+		 LogEvent($LogFile, $File[$FILE_NAME] & " (" & $File[$FILE_PARENTFOLDER] & ") exceeding the $MAX_SIZEINBYTES (" & $MAX_SIZEINBYTES & ") File size -> " & $File[$FILE_SIZE], False)
+		 $File[$FILE_STATUS] = $STATE_INVALID ; Set state STATE_INVALID (file size)
+		 LogEvent($LogFile, $File[$FILE_NAME] & " (" & $File[$FILE_PARENTFOLDER] & ") (" & $FileState[$File[$FILE_STATUS]] & ")", False)
+	  EndIf
+   ElseIf Not StringRegExp($File[$FILE_NAME],"pdf$") Then
+	  $InvalidFiles = $InvalidFiles + 1
+	  LogEvent($LogFile, $File[$FILE_NAME] & " (" & $File[$FILE_PARENTFOLDER] & ") (" & $FileState[$File[$FILE_STATUS]] & ")", False)
+	  LogEvent($LogFile, $File[$FILE_NAME] & " is not a valid .pdf file", False)
+	  $File[$FILE_STATUS] = $STATE_INVALID ; Set state STATE_INVALID (file type)
+	  LogEvent($LogFile, $File[$FILE_NAME] & " (" & $File[$FILE_PARENTFOLDER] & ") (" & $FileState[$File[$FILE_STATUS]] & ")", False)
+   Else
+	  $ValidFiles = $ValidFiles + 1
+	  $File[$FILE_STATUS] = $STATE_OK ; Set state STATE_OK
+   EndIf
+```
+
+```autoit
+   If $File[$FILE_STATUS] = $STATE_OK Then
+	  $File[$FILE_STATUS] = $STATE_COPYBEGIN
+	  LogEvent($LogFile, $File[$FILE_NAME] & " (" & $File[$FILE_PARENTFOLDER] & ") (" & $FileState[$File[$FILE_STATUS]] & ")", False)
+
+	  Switch $DataSource
+
+		 Case $SOURCE_NETDRIVE
+			If $CliParams[$CLI_SUBDIRS] Then
+			   If FileCopy($File[$FILE_PATH], $PathSrc & "\" & $File[$FILE_PARENTFOLDER] & "_" & $File[$FILE_NAME]) Then
+				  $File[$FILE_STATUS] = $STATE_COPIED
+				  LogEvent($LogFile, $File[$FILE_NAME] & " (" & $File[$FILE_PARENTFOLDER] & ") (" & $FileState[$File[$FILE_STATUS]] & ")", False)
+			   EndIf
+			Else
+			   If FileCopy($File[$FILE_PATH], $PathSrc & "\" & $File[$FILE_NAME]) Then
+				  $File[$FILE_STATUS] = $STATE_COPIED
+				  LogEvent($LogFile, $File[$FILE_NAME] & " (" & $File[$FILE_PARENTFOLDER] & ") (" & $FileState[$File[$FILE_STATUS]] & ")", False)
+			   EndIf
+			EndIf
+
+		 Case $SOURCE_SHAREPOINT
+			If $CliParams[$CLI_SUBDIRS] Then
+			   If SPDownloadFile($Http, $File[$FILE_PATH], $PathSrc & "\" & $File[$FILE_PARENTFOLDER] & "_" & $File[$FILE_NAME], $SpAccessToken) Then
+				  $File[$FILE_STATUS] = $STATE_COPIED
+				  LogEvent($LogFile, $File[$FILE_NAME] & " (" & $File[$FILE_PARENTFOLDER] & ") (" & $FileState[$File[$FILE_STATUS]] & ")", False)
+			   EndIf
+			Else
+			   If SPDownloadFile($Http, $File[$FILE_PATH], $PathSrc & "\" & $File[$FILE_NAME], $SpAccessToken) Then
+				  $File[$FILE_STATUS] = $STATE_COPIED
+				  LogEvent($LogFile, $File[$FILE_NAME] & " (" & $File[$FILE_PARENTFOLDER] & ") (" & $FileState[$File[$FILE_STATUS]] & ")", False)
+			   EndIf
+			EndIf
+	  EndSwitch
+   EndIf
+```
+
+From STATE_OK file moves to STATE_COPYBEGIN and we try to copy the file to the local cache    
+Only if copying is successfull the file is allowed to move to STATE_COPIED 
+
+If any file for any reason doesn't reach the final 
+
+![Alt text](.images/LogNOFILES.PNG)
 
 
