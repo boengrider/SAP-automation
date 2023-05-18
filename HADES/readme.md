@@ -111,17 +111,21 @@ Only if copying is successfull the file is allowed to move to STATE_COPIED
 ```
 
 
-
+```
 Here the file didn't reach the state STATE_DRAGDROPPED.  
 There could've been many reasons and therefore execution stops and the file is deleted from the local cache.  
 Email message containing log file is sent  
 
 ![Alt text](.images/LogNOK.PNG)
+```
 
+```
 Usually we're able to recover and process the file that failed during the next script run  
 ![Alt text](.images/Failedfilerecovered.PNG)  
+```
 
+```
 This message is sent when processing went ok but there might've been some files that were considered invalid due to the exceeding file size or unsupported file type  
 ![Alt text](.images/LogNOK2.png)
-
+```
 
