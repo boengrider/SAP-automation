@@ -8,6 +8,11 @@
 #include <FileConstants.au3>
 #include <WinAPIFiles.au3>
 
+;Replace with your own values
+; {{YOUR_DATABASE}} Line 1046
+; {{MAILSERVER}} Line 1255
+; {{TENANT}} Multiple places (search)
+
 #Region Main script
 
 #Region Constants
@@ -26,7 +31,7 @@ Const $AUTO_FOLDER_ROOT = "C:\!AUTO"
 Const $AUTO_FOLDER_SOURCE = "SOURCE"
 Const $AUTO_FOLDER_ARCHIVE = "ARCHIVE"
 Const $SAP_LOCAL_LANDSCAPE_PATH = @AppDataDir & "\SAP\Common\SAPUILandscape.xml"
-Const $SYS_ADMINS = "tomas.ac@volvo.com;tomas.chudik@volvo.com"
+Const $SYS_ADMINS = "admin@admin.com"
 #EndRegion
 
 #Region Variables
@@ -732,7 +737,7 @@ Func SPFolderGetFileCount(ByRef $_oHTTP, $_sSiteUrl, $_sSecurityToken, $_bSubdir
    ;***************************
    ; subdirs
    ;***************************
-   ;https://TENANT.sharepoint.com/sites/unit-hades/_api/web/GetFolderByServerRelativeUrl('SI01_HADES_SOURCE')/Folders?$filter=startswith(Name,'SI01')
+   ;https://{{TENANT}}.sharepoint.com/sites/unit-hades/_api/web/GetFolderByServerRelativeUrl('SI01_HADES_SOURCE')/Folders?$filter=startswith(Name,'SI01')
    ;Replace with company code
 	  With $_oHTTP
 		 .open("GET", $__BaseApiUrl & "web/GetFolderByServerRelativeUrl('" & $__SharepointDir & "')/Folders?$filter=startswith(Name,'" & $_sSubdirPrefix & "')", False)
@@ -1042,7 +1047,7 @@ EndFunc
 #Region Credentials
 Func GetCredentials($_resourceName)
    Local Enum $credentialUser = 0, $credentialPassword, $credentialDomain, $credentialHost ; 0,1,2,3
-   Local $__conectionString = "Provider=Microsoft.ACE.OLEDB.12.0;WSS;IMEX=1;RetrieveIds=Yes;DATABASE=https://volvogroup.sharepoint.com/sites/unit-rc-sk-bs-it/CREDENTIALS;LIST=CREDENTIALS;"
+   Local $__conectionString = "Provider=Microsoft.ACE.OLEDB.12.0;WSS;IMEX=1;RetrieveIds=Yes;DATABASE={{YOUR_DATABASE}};LIST=CREDENTIALS;"
    Local $__adodbConnection = ObjCreate("Adodb.Connection")
    Local $__adodbRecordset  = ObjCreate("Adodb.Recordset")
    Local $__credentials[4]
@@ -1190,7 +1195,7 @@ EndFunc
    Local $oNET = ObjCreate("Wscript.Network")
 
    With $oHTTP
-	  .open("GET", "https://volvogroup.sharepoint.com/sites/unit-rc-sk-bs-it/_api/web/lists/getbytitle('WDAPP')/items?$select=Title&$filter=(Title eq '" & $sProjectName & "')", False)
+	  .open("GET", "https://{{TENANT}}.sharepoint.com/sites/unit-rc-sk-bs-it/_api/web/lists/getbytitle('WDAPP')/items?$select=Title&$filter=(Title eq '" & $sProjectName & "')", False)
 	  .setRequestHeader("Authorization", "Bearer " & $SpAccessToken)
 	  .setRequestHeader("Accept", "application/atom+xml;odata=verbose")
 	  .send()
@@ -1248,7 +1253,7 @@ Func MessageToAdmin($_sSubject, $_sMessage, $_sAdmins, $_logfilePath)
 		.Subject = $_sSubject
 	    .AddAttachment($_logfilePath)
 		.Configuration.Fields.Item("http://schemas.microsoft.com/cdo/configuration/sendusing") = 2
-		.Configuration.Fields.Item("http://schemas.microsoft.com/cdo/configuration/smtpserver") = "mailgot.it.volvo.net"
+		.Configuration.Fields.Item("http://schemas.microsoft.com/cdo/configuration/smtpserver") = {{MAILSERVER}}
 		.Configuration.Fields.Item("http://schemas.microsoft.com/cdo/configuration/smtpserverport") = 25
 		.HTMLBody = $_sMessage
 		.Configuration.Fields.Item("urn:schemas:mailheader:X-MSMail-Priority") = "High"
