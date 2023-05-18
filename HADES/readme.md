@@ -2,6 +2,19 @@
 
 ## Uploads files to SAP via OAWD transaction
 
+HADES.au3 -s|--system -c|--client -src|--source -cc|--companycode -oawd [-nosub|--nosubdir] [-as|--archivesharepoint] [-nal|--noarchlocal]  
+```
+-s | --system <- Mandatory parameter  
+-c | --client <- Mandatory parameter  
+-src | --source <- Mandatory parameter  
+-cc | --companycode <- Mandatory parameter  
+-oawd <- Mandatory parameter  
+-nosub | --nosubdir <- Optional parameter  
+-as | --archivesharepoint <- Optional parameter  
+-nal | --noarchlocal <- Optional parameter  
+```  
+  
+  
 ### Example Call #1  
 -s fq2  -c 105  -oawd "SI01 FI Scan"  -src C:\!AUTO\SI01_HADES_DND_NET  -cc si01  -nal	-nosub	-as  https://TENANT.sharepoint.com/sites/unit-hades/SI01_HADES_ARCHIVE  
 ```
