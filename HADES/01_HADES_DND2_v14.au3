@@ -8,26 +8,6 @@
 #include <FileConstants.au3>
 #include <WinAPIFiles.au3>
 
-
-
-#Region About
-;Example Call #1
-;         -s fq2        -c 105        -oawd "SI01 FI Scan"  	-src C:\!AUTO\SI01_HADES_DND_NET      -cc si01            -nal																 -nosub																		-as https://volvogroup.sharepoint.com/sites/unit-hades/SI01_HADES_ARCHIVE
-;         ^^^^^^^^^^    ^^^^^^^^^^^    ^^^^^^^^^^^^^^^^^^^^ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^      ^^^^^^^^^^^^^       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-;         SAP SYSTEM    SAP CLIENT      Oawd folder				Source location				           Company code       No local archivation (if ommited files will be archived localy      Do not process subfolders (if ommited subfolders will be processed)        Arhive files to the sharepoint site
-;Example Call #2
-;		  -s fq2 -c 105 -src https://volvogroup.sharepoint.com/sites/unit-hades/SI01_HADES_SOURCE -cc si01 -nal -nosub -as https://volvogroup.sharepoint.com/sites/unit-hades/SI01_HADES_ARCHIVE -oawd "SI01 FI Scan"
-;Example Call #3
-; -s fq2 -c 105 -oawd "SI01 FI Scan" -src \\Czpragn006\hades_qa -cc si01 -as https://volvogroup.sharepoint.com/sites/unit-hades/SI01_HADES_ARCHIVE -oawd "SI01 FI Scan"
-;Example Call #4
-; -s fq2 -c 105 -oawd "SI01 FI Scan" -src \\10.229.128.6\mk01_hades_dnd -cc si01 -as https://volvogroup.sharepoint.com/sites/unit-hades/SI01_HADES_ARCHIVE
-;Exit codes
-;1-99 - Something other than errors e.g no parameters passed
-;100 - General script errors
-;200 - SAP related errors
-;300 - Sharepoint related errors
-#EndRegion
-
 #Region Main script
 
 #Region Constants
@@ -752,7 +732,7 @@ Func SPFolderGetFileCount(ByRef $_oHTTP, $_sSiteUrl, $_sSecurityToken, $_bSubdir
    ;***************************
    ; subdirs
    ;***************************
-   ;https://volvogroup.sharepoint.com/sites/unit-hades/_api/web/GetFolderByServerRelativeUrl('SI01_HADES_SOURCE')/Folders?$filter=startswith(Name,'SI01')
+   ;https://TENANT.sharepoint.com/sites/unit-hades/_api/web/GetFolderByServerRelativeUrl('SI01_HADES_SOURCE')/Folders?$filter=startswith(Name,'SI01')
    ;Replace with company code
 	  With $_oHTTP
 		 .open("GET", $__BaseApiUrl & "web/GetFolderByServerRelativeUrl('" & $__SharepointDir & "')/Folders?$filter=startswith(Name,'" & $_sSubdirPrefix & "')", False)
