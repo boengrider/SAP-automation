@@ -124,7 +124,8 @@ Usually we're able to recover and process the file that failed during the next s
 ![Alt text](.images/Failedfilerecovered.PNG)  
 
 ```
-This message is sent when processing went ok but there might've been some files that were considered invalid due to the exceeding file size or unsupported file type  
+This message is sent when processing went ok but there might've been some files  
+that were considered invalid due to the exceeding file size or unsupported file type  
 ```
 ![Alt text](.images/LogNOK2.png)
 
