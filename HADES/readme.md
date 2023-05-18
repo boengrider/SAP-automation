@@ -112,8 +112,8 @@ Only if copying is successfull the file is allowed to move to STATE_COPIED
 
 
 
-If any file for any reason doesn't reach the final 
 
-![Alt text](.images/LogNOFILES.PNG)
+
+![Alt text](.images/Failedfilerecovered.PNG)
 
 
