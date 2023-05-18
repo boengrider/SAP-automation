@@ -118,7 +118,7 @@ Email message containing log file is sent
 
 ![Alt text](.images/LogNOK.PNG)
 
-Sometimes we're able to recover and process the file that failed during the next script run  
+Usually we're able to recover and process the file that failed during the next script run  
 ![Alt text](.images/Failedfilerecovered.PNG)
 
 
