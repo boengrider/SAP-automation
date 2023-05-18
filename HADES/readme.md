@@ -47,10 +47,11 @@ HADES.au3 -s|--system -c|--client -src|--source -cc|--companycode -oawd [-nosub|
 
 Script processes in one-at-a-time fashion. Each file goes through multiple states and is considered processed only when it reaches the final state.
 
-Each file in the source location has its initial state STATE_INTIAL   
+Each file in the source location has its initial state STATE_INITIAL   
 
 We then check whether the file does not exceed the size limit and is of a accepted file type, .pdf in this case   
 If the file satisfies these two conditions it's moved to the STATE_OK state, otherwise it's stated is STATE_INVALID  
+
 ```autoit
 If $File[$FILE_SIZE] >= $MAX_SIZEINBYTES Then
 	  If $MAX_SIZEINBYTES <> -1 Then
@@ -71,7 +72,8 @@ If $File[$FILE_SIZE] >= $MAX_SIZEINBYTES Then
 	  $File[$FILE_STATUS] = $STATE_OK ; Set state STATE_OK
    EndIf
 ```
-
+From STATE_OK file moves to STATE_COPYBEGIN and we try to copy the file to the local cache    
+Only if copying is successfull the file is allowed to move to STATE_COPIED 
 ```autoit
    If $File[$FILE_STATUS] = $STATE_OK Then
 	  $File[$FILE_STATUS] = $STATE_COPYBEGIN
@@ -108,8 +110,7 @@ If $File[$FILE_SIZE] >= $MAX_SIZEINBYTES Then
    EndIf
 ```
 
-From STATE_OK file moves to STATE_COPYBEGIN and we try to copy the file to the local cache    
-Only if copying is successfull the file is allowed to move to STATE_COPIED 
+
 
 If any file for any reason doesn't reach the final 
 
