@@ -1,9 +1,10 @@
 ### SAPLauncher
+Opens a new 
 ``` vbscript
 Dim wsh : Set wsh = CreateObject("Wscript.Shell")
 Set launcher = New SAPLauncher
-launcher.SetClientName = cliName__
-launcher.SetSystemName = sysName__
+launcher.SetClientName = 105
+launcher.SetSystemName = "FQ2"
 launcher.SetLocalXML = wsh.ExpandEnvironmentStrings("%APPDATA%") & "\SAP\Common\SAPUILandscape.xml"
 launcher.CheckSAPLogon
 launcher.FindSAPSession
