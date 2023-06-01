@@ -12,8 +12,8 @@ Class SAPLauncher
 	Private strLocalLandscapePATH
 	Private boolSAPRunning  		' Indicates whether SPA Logon is runniied files
 	Private boolSessionFound		' Set to true if session was found or created
-  Private strSSN 					    ' Sap System Name e.g FQ2
-  Private strSCN  	    		  ' Sap Client Name e.g. 105
+	Private strSSN 			        ' Sap System Name e.g FQ2
+	Private strSCN  	    		' Sap Client Name e.g. 105
 	Private strSSD          		' Sap System Description. This string is found in the local landscape xml and used to connect to the sap system
 
 
