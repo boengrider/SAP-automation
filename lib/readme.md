@@ -1,5 +1,7 @@
 ### SAPLauncher
-Opens a new 
+* Opens a new connection to the specified system and client and returns a session object  
+* Class supports multiclient
+
 ``` vbscript
 Dim wsh : Set wsh = CreateObject("Wscript.Shell")
 Set launcher = New SAPLauncher
