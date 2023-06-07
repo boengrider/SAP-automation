@@ -18,3 +18,17 @@ End If
 'Dosomething with the session object
  launcher.GetSession
 ```
+
+### GetExcelWorkbook  
+Sometimes when interacting with SAP via scripting engine, documents are exported in a bit different way.  
+Function simply searches for the desired workbooks.
+However it only searches 1st instance of an excel process
+
+``` vbscript
+Dim wb
+If GetExcelWorkbook("report.xlsx",wb) Then 
+  'Found
+Else
+  'Not found
+End If
+```
