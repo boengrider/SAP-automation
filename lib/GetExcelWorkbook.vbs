@@ -1,6 +1,6 @@
 Function GetExcelWorkbook(ByVal reportName, ByRef outWorkbook)
           
-	  On Error Resume Next
+	On Error Resume Next
       Dim waitTime : waitTime = 500
       Dim waitTurns : waitTurns = 5
       Dim turn : turn = 0
@@ -41,13 +41,7 @@ Function GetExcelWorkbook(ByVal reportName, ByRef outWorkbook)
 
 End Function
 
-Dim wb
-If GetExcelWorkbook("report.xlsx",wb) Then 
-   Wscript.echo "Workbook found"
-   Wscript.echo wb.Name & " " & wb.fullname
-else 
-   wscript.echo "Workbook not found"
-end if 
+
 
 
 
