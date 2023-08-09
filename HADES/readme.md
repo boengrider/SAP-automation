@@ -129,3 +129,7 @@ that were considered invalid due to the exceeding file size or unsupported file 
 ```
 ![Alt text](.images/LogNOK2.png)
 
+
+### Uploading some files via SAP Drag & Drop facility (video)
+[![IMAGE ALT TEXT](http://img.youtube.com/vi/4wIKc9Jo1t0/0.jpg)](http://www.youtube.com/watch?v=4wIKc9Jo1t0 "SAP Drag & Drop (AutoIt)")
+
