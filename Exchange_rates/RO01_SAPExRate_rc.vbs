@@ -1,3 +1,4 @@
+'Replace $YOUR_VALUE_HERE token with actual values
 Option Explicit
 ' Script error codes:
 ' 10x -> Login information problem
@@ -37,7 +38,7 @@ Dim oMAIL : Set oMAIL = New Mailer
 Dim oRATECHECK : Set oRATECHECK = New RateCheck_v1
 Dim oRATES
 Dim oFILE
-oMAIL.AddAdmin = "tomas.ac@volvo.com;tomas.chudik@volvo.com"
+oMAIL.AddAdmin = $YOUR_VALUE_HERE
 oRX.Pattern = DATE_RX
 oRX.Global = True
 oRX.IgnoreCase = True
@@ -143,7 +144,7 @@ End If
 '++++++++++++++++++++++++++++++++
 'Intialize TCD calendar
 oTCD.Init "Provider=Microsoft.ACE.OLEDB.12.0;WSS;IMEX=1;RetrieveIds=Yes;" & _
-		  "DATABASE=https://volvogroup.sharepoint.com/sites/unit-financean/exrate/RO01_exrate;" & _
+		  "DATABASE=https://$YOUR_VALUE_HERE.sharepoint.com/sites/unit-financean/exrate/RO01_exrate;" & _
 		  "LIST=RO01_exrate_calendar;"
 		  
 
@@ -1141,7 +1142,7 @@ Class Mailer
    				("http://schemas.microsoft.com/cdo/configuration/sendusing") = 2
 				.Configuration.Fields.Item _
     			("http://schemas.microsoft.com/cdo/configuration/smtpserver") = _
-        		"mailgot.it.volvo.net" 
+        		"$YOUR_VALUE_HERE" 
 				.Configuration.Fields.Item _
   	    		("http://schemas.microsoft.com/cdo/configuration/smtpserverport") = 25
   	    		.TextBody = strMessage
@@ -1176,7 +1177,7 @@ Function Checkin(sProjectName,sResourceName)
 	Dim oRST : Set oRST = CreateObject("Adodb.Recordset")
 	Dim oRX : Set oRX = New RegExp
 	Dim connectionString : connectionString = "Provider=Microsoft.ACE.OLEDB.12.0;WSS;IMEX=1;RetrieveIds=Yes;" & _
-							 "DATABASE=https://volvogroup.sharepoint.com/sites/unit-rc-sk-bs-it/CREDENTIALS;" & _
+							 "DATABASE=https://$YOUR_VALUE_HERE.sharepoint.com/sites/unit-rc-sk-bs-it/CREDENTIALS;" & _
 						 	 "LIST=CREDENTIALS;"
 	
 	'Load credentials from SP list
