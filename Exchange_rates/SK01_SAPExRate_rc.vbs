@@ -1,3 +1,4 @@
+'Replace $YOUR_VALUE_HERE token with actual values
 Option Explicit 
 
 Const PROJECT = "SK01_SAPExRate"
@@ -632,7 +633,7 @@ Class Mailer
    				("http://schemas.microsoft.com/cdo/configuration/sendusing") = 2
 				.Configuration.Fields.Item _
     			("http://schemas.microsoft.com/cdo/configuration/smtpserver") = _
-        		"mailgot.it.volvo.net" 
+        		"$YOUR_VALUE_HERE" 
 				.Configuration.Fields.Item _
   	    		("http://schemas.microsoft.com/cdo/configuration/smtpserverport") = 25
   	    		.TextBody = strMessage
@@ -1364,21 +1365,6 @@ Class RateCheck_v1
 		
 	End Sub  	
 	
-	
-				
-''============================================================
-'' Program:   SUB Killpopups
-'' Desc:      Kill of SAP popup screens which could appear when executing SAP transactions
-'' Called by: 
-'' Call:      KillPopups
-'' Arguments: s = connection.children(0)
-'' Changes---------------------------------------------------
-'' Date		Programmer	Change
-'' 2020-06-01	Tomas Chudik(tomas.chudik@volvo.com)	Written as vbscript SUB with arguments; supports kill of "System Message", "Copyright", "License Information for Multiple Logon"
-'' 2020-06-03	Tomas Chudik(tomas.chudik@volvo.com)	Version 2 without arguments for use in VBA
-'' 2020-07-06	Tomas Chudik(tomas.chudik@volvo.com)	Version 3 (v3-arg) supports kill of Information window while ExRates rate adjustment
-'' 2022-07-28	Tomas Chudik(tomas.chudik@volvo.com)	Correction in Multiple Logon condition
-''============================================================
 
 Sub KillPopups(s)
 Do While s.Children.Count > 1
