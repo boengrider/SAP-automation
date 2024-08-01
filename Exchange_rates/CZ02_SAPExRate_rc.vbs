@@ -1,3 +1,4 @@
+'Replace $YOUR_VALUE_HERE token with actual values
 Option Explicit 
 
 Const PROJECT = "CZ02_SAPExRate"
@@ -21,7 +22,7 @@ If Hour(Time()) < 14 Then
 End If
 
 oLOG.LocalLogFile = oWSH.ExpandEnvironmentStrings("%SYSTEMDRIVE%") & "\ExRate"
-oMAIL.AddAdmin = "tomas.ac@volvo.com,tomas.chudik@volvo.com"
+oMAIL.AddAdmin = $YOUR_VALUE_HERE 
 
 oTCD.Init ' Initialize the new instance
 oTCD.AddTCD "01012021","Novy rok"
@@ -64,7 +65,7 @@ oCNBRATE.Fcurrs = "EUR,SEK,USD,PLN,HUF,BGN,DKK,GBP,NOK,RON"
 oCNBRATE.OverrideQuantity = "EUR,USD,PLN,DKK,GBP,NOK" ' Applies for home currency e.g. EUR CZK 0,26635 1 100 ; CZK EUR 3,756 100 1
 'oCNBRATE.AdjustRate = "EUR,USD,PLN,HUF,DKK,GBP,NOK,RUB" 
 oCNBRATE.AdjustRate = "EUR,USD,PLN,HUF,DKK,GBP,NOK" 
-oCNBRATE.AddOutputDirs = "\\vcn.ds.volvo.net\cli-sd\sd1294\046629\output\02_CZ02_ExRateProcessing"
+oCNBRATE.AddOutputDirs = "\\$YOUR_VALUE_HERE\02_CZ02_ExRateProcessing"
 
 
 oLOG.LogEvent "Today is a TCD: " & CStr(oTCD.IsTodayTCD),"INF",False
@@ -853,7 +854,7 @@ Class Mailer
    				("http://schemas.microsoft.com/cdo/configuration/sendusing") = 2
 				.Configuration.Fields.Item _
     			("http://schemas.microsoft.com/cdo/configuration/smtpserver") = _
-        		"mailgot.it.volvo.net" 
+        		"$YOUR_VALUE_HERE " 
 				.Configuration.Fields.Item _
   	    		("http://schemas.microsoft.com/cdo/configuration/smtpserverport") = 25
   	    		.TextBody = strMessage
