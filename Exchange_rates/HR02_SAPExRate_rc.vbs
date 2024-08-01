@@ -1,3 +1,4 @@
+'Replace $YOUR_VALUE_HERE token with actual values
 Option Explicit
 Const PROJECT = "HR02_SAPExRate"
 Const CRFILE = "C:\!AUTO\CREDENTIALS\logins.txt"
@@ -17,7 +18,7 @@ outputdir = oWSH.ExpandEnvironmentStrings("%SYSTEMDRIVE%") & OUTDIR ' C:\ExRate\
 system = WScript.Arguments.Item(0) ' SAP system name
 client = WScript.Arguments.Item(1) ' SAP client name
 oLOG.LocalLogFile = oWSH.ExpandEnvironmentStrings("%SYSTEMDRIVE%") & "\ExRate"
-oMAIL.AddAdmin = "tomas.ac@volvo.com,tomas.chudik@volvo.com"
+oMAIL.AddAdmin = 'Replace $YOUR_VALUE_HERE token with actual values
 
 
 'If Hour(Time()) <= 17 Then 
@@ -375,7 +376,7 @@ Class Mailer
    				("http://schemas.microsoft.com/cdo/configuration/sendusing") = 2
 				.Configuration.Fields.Item _
     			("http://schemas.microsoft.com/cdo/configuration/smtpserver") = _
-        		"mailgot.it.volvo.net" 
+        		"$YOUR_VALUE_HERE" 
 				.Configuration.Fields.Item _
   	    		("http://schemas.microsoft.com/cdo/configuration/smtpserverport") = 25
   	    		.TextBody = strMessage
